@@ -1,5 +1,6 @@
 import { S3Event } from "aws-lambda";
 import { Textract } from "aws-sdk";
+import { toInvoice } from "../helpers/invoice.helper";
 
 export const handler = async (event: S3Event) => {
   const bucketName = event.Records[0].s3.bucket.name;
@@ -15,23 +16,14 @@ export const handler = async (event: S3Event) => {
   };
 
   const textract = new Textract();
-  const command = textract.startExpenseAnalysis({
-    DocumentLocation: {
-      S3Object: {
-        Bucket: bucketName,
-        Name: fileName,
-      },
-    },
-  });
-  const { JobId } = await command.promise();
-
-  const analysis = await textract.getDocumentAnalysis().promise();
+  const analyse = await textract.analyzeExpense(params).promise();
+  const invoice = toInvoice(analyse);
 
   return {
     statusCode: 200,
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ event, analysis }),
+    body: JSON.stringify({ fileName, invoice }),
   };
 };

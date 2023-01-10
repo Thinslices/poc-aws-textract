@@ -23,11 +23,7 @@ export function MyStack({ stack }: StackContext) {
   const invoiceUploadFunction = new Function(stack, "InvoiceUpload", {
     handler: "functions/invoice-upload.handler",
     bind: [invoiceObjectsTable],
-    permissions: [
-      "s3:GetObject",
-      "textract:StartExpenseAnalysis",
-      "textract:GetDocumentAnalysis",
-    ],
+    permissions: ["s3:GetObject", "textract:AnalyzeExpense"],
   });
 
   const uploadedInvoicesBucket = new Bucket(stack, "UploadedInvoices", {
